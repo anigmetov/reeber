@@ -1,5 +1,5 @@
 #foreach(real   float double)
-foreach(real   float)
+foreach(real   double)
 # AMR
 find_package(AMReX REQUIRED HINTS ${AMREX_INSTALL_DIR})
 
