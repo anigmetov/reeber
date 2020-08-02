@@ -610,6 +610,7 @@ int main(int argc, char** argv)
         timer.restart();
 
         bool verbose = false;
+        world.barrier();
 
         if (write_diag)
         {
@@ -620,10 +621,12 @@ int main(int argc, char** argv)
                     [&extra, &test_local, ignore_zero_persistence, absolute_rho](Block* b,
                             const diy::Master::ProxyWithLink& cp)
                     {
-                        output_persistence(b, cp, extra, test_local, absolute_rho, ignore_zero_persistence);
+                        output_persistence(b, cp, &extra, test_local, absolute_rho, ignore_zero_persistence);
                         dlog::flush();
                     });
         }
+        world.barrier();
+
 
         LOG_SEV_IF(world.rank() == 0, info) << "Time to write diagrams:  " << dlog::clock_to_string(timer.elapsed());
         time_for_output += timer.elapsed();
