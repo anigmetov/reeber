@@ -41,6 +41,9 @@ struct OutputPairs
         if (!test_local(block, from))
             return;
 
+        //LOG_SEV(info) << "from " << from->vertex << " through " << through->vertex << " to  " << to->vertex << ", threshold = " << threshold;
+        //LOG_SEV(info) << "from_value " << from->value << " through " << through->value << " to  " << to->value << ", threshold = " << threshold;
+
         if (extra->verbose)
         {
             std::string s;
@@ -71,7 +74,15 @@ struct OutputPairs
                     death_time = threshold;
             }
 
-            if (ignore_zero_persistence and birth_time == death_time)
+            bool is_root = (from->vertex == to->vertex) && (to->vertex == through->vertex);
+
+            if (is_root && negate) {
+                death_time = -std::numeric_limits<RealType>::infinity();
+            } else if (is_root && !negate) {
+                death_time = std::numeric_limits<RealType>::infinity();
+            }
+
+            if (ignore_zero_persistence && birth_time == death_time)
                 return;
 
 //            fmt::print("PERSISTENCE {} {}\n", birth_time, death_time);

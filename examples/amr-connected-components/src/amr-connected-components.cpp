@@ -2,7 +2,7 @@
 //#define REEBER_NO_SPARSIFICATION
 
 //#define REEBER_DO_DETAILED_TIMING
-#define REEBER_EXTRA_INTEGRAL
+//#define REEBER_EXTRA_INTEGRAL
 
 #include "reeber-real.h"
 
@@ -371,6 +371,7 @@ int main(int argc, char** argv)
         read_amr_plotfile(input_filename, all_var_names, n_mt_vars, world, nblocks, master_reader, header, cell_volume, domain);
     } else
     {
+        LOG_SEV_IF(world.rank() == 0, info) << "reading file " << input_filename << ", all_var_names = " << container_to_string(all_var_names);
         read_from_file(input_filename, all_var_names, n_mt_vars, world, master_reader, assigner, header, domain, split, nblocks);
     }
 

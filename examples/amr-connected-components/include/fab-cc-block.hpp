@@ -35,6 +35,8 @@ FabComponentBlock<Real, D>::FabComponentBlock(diy::GridRef<Real, D>& fab_grid,
         this->set_mask(v, amr_link, rho, is_absolute_threshold);
     });
 
+    LOG_SEV(debug) << "set_mask done";
+    dlog::flush();
 #ifdef REEBER_ENABLE_CHECKS
     for(int i = 0; i < amr_link->size(); ++i)
     {
@@ -535,6 +537,9 @@ void FabComponentBlock<Real, D>::compute_original_connected_components(
     // hence size() must be memorized before loop
     auto extra_names_size = extra_names_.size();
 #endif
+
+    LOG_SEV(debug) << "start loop over tree nodes";
+    dlog::flush();
 
     for(const auto& vertex_neighbor_pair : const_tree.nodes())
     {
