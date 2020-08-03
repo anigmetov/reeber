@@ -1,5 +1,5 @@
 # src files
-foreach(real   double )
+foreach(real   float )
 
 # AMR
 find_package(AMReX REQUIRED HINTS ${AMREX_INSTALL_DIR})
