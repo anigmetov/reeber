@@ -25,10 +25,13 @@ struct TripletMergeTreeBlock
     typedef     r::TripletMergeTree<Index, Value> TripletMergeTree;
     typedef     std::vector<Real>                 Size;
 
+    typedef     Real                              RealType;
+
     typedef     std::tuple<Index, Index>          Edge;
 
     using EdgeMap  = reeber::EdgeMap<Index, Value>;
     using EdgeMaps = reeber::EdgeMaps<Index, Value>;
+    using Neighbor = TripletMergeTree::Neighbor;
 
     static void*            create()                                        { return new TripletMergeTreeBlock; }
     static void             destroy(void* b)                                { delete static_cast<TripletMergeTreeBlock*>(b); }
@@ -45,6 +48,9 @@ struct TripletMergeTreeBlock
     Size                    cell_size;
     EdgeMap                 edges;
     EdgeMaps                edge_maps;
+
+    TripletMergeTree&       get_merge_tree() { return mt; }
+    const TripletMergeTree& get_merge_tree() const { return mt; }
 };
 
 namespace diy

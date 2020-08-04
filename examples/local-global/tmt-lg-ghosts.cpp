@@ -23,6 +23,20 @@
 #include "reader-interfaces.h"
 #include "edges.h"
 #include "triplet-merge-tree-block.h"
+#include "output-persistence.h"
+
+using Neighbor = TripletMergeTreeBlock::Neighbor;
+
+struct IsVertexLocal
+{
+    bool operator()(const TripletMergeTreeBlock& b, const Neighbor& from) const
+    {
+        return b.local.contains(from->vertex);
+    }
+};
+
+using OutputPairsR = OutputPairs<TripletMergeTreeBlock, IsVertexLocal>;
+
 
 // Load the specified chunk of data, compute local merge tree, add block to diy::Master
 struct LoadAdd
@@ -438,14 +452,20 @@ int main(int argc, char** argv)
     // save the result
     if (outfn != "none")
     {
-    if (!split)
-        diy::io::write_blocks(outfn, world, master);
-    else
-        diy::io::split::write_blocks(outfn, world, master);
+        Real absolute_rho = 0;
+        bool ignore_zero_persistence = true;
+        OutputPairsR::ExtraInfo extra(outfn, false, world);
+        IsVertexLocal test_local;
+        master.foreach(
+                [&extra, &test_local, ignore_zero_persistence, absolute_rho](TripletMergeTreeBlock* b,
+                        const diy::Master::ProxyWithLink& cp)
+                {
+                    output_persistence(b, cp, &extra, test_local, absolute_rho, ignore_zero_persistence);
+                });
     }
 
     world.barrier();
-    LOG_SEV_IF(world.rank() == 0, info) << "Time to output trees:    " << dlog::clock_to_string(timer.elapsed());
+    LOG_SEV_IF(world.rank() == 0, info) << "Time to output diagrams:    " << dlog::clock_to_string(timer.elapsed());
     timer.restart();
 
     dlog::prof.flush();     // TODO: this is necessary because the profile file will close before
