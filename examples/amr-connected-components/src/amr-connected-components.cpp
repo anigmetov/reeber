@@ -36,6 +36,10 @@
 #include "amr-plot-reader.h"
 #include "amr-connected-components-complex.h"
 
+#include <lowfive/vol-base.hpp>
+#include <lowfive/vol-metadata.hpp>
+#include <lowfive/vol-dist-metadata.hpp>
+
 
 // block-independent types
 using AMRLink = diy::AMRLink;
@@ -207,6 +211,11 @@ void write_tree_blocks(const diy::mpi::communicator& world, bool split, const st
 
 int main(int argc, char** argv)
 {
+    // setup low five
+    LowFive::MetadataVOL vol;
+    LowFive::LocationPattern loc_pat { "*", "*" };
+    vol.passthru.push_back(loc_pat);
+
     diy::mpi::environment env(argc, argv);
     diy::mpi::communicator world;
 
