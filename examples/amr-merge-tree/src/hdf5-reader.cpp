@@ -32,12 +32,16 @@ void read_from_hdf5_file(std::string infn,
     using FabBlockR = FabBlock<Real, D>;
 
     h5::File in(infn);
+    std::cerr << "HighFive file opened" << std::endl;
 
     // get shape
     std::vector<h5::DataSet> datasets;
     for (auto name : all_var_names)
         datasets.emplace_back(in.getDataSet(name));
+    std::cerr << "HighFive datasets emplace OK" << std::endl;
     auto dimensions = datasets[0].getDimensions();
+    std::cerr << "HighFive datasets dimensions OK" << std::endl;
+
 
     using Decomposer = diy::RegularDecomposer<diy::DiscreteBounds>;
     using Point   = diy::DynamicPoint<int, DIY_MAX_DIM>;
