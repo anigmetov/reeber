@@ -1,2 +1,2 @@
-#include <diy/thirdparty/fmt/format.h>
-#include <diy/thirdparty/fmt/ostream.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>

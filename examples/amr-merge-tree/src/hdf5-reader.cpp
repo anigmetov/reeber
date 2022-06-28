@@ -17,6 +17,14 @@ namespace h5 = HighFive;
 
 #include "fab-block.h"
 
+herr_t
+fail_on_hdf5_error(hid_t stack_id, void*)
+{
+    H5Eprint(stack_id, stderr);
+    fprintf(stderr, "An HDF5 error was detected. Terminating.\n");
+    exit(1);
+}
+
 void read_from_hdf5_file(std::string infn,
                          std::vector<std::string> all_var_names, // HDF5 only: all fields that will be read from plotfile
                          int n_mt_vars,                          // sum of first n_mt_vars in all_var_names will be stored in fab of FabBlock,
@@ -31,50 +39,57 @@ void read_from_hdf5_file(std::string infn,
     constexpr unsigned D = 3;
     using FabBlockR = FabBlock<Real, D>;
 
+    H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
+
     h5::File in(infn);
-    std::cerr << "HighFive file opened" << std::endl;
+    std::cerr << "HighFive file opened, file id = " << in.getId() << std::endl;
 
-    // get shape
-    std::vector<h5::DataSet> datasets;
-    for (auto name : all_var_names)
-        datasets.emplace_back(in.getDataSet(name));
-    std::cerr << "HighFive datasets emplace OK" << std::endl;
-    auto dimensions = datasets[0].getDimensions();
-    std::cerr << "HighFive datasets dimensions OK" << std::endl;
-
-
-    using Decomposer = diy::RegularDecomposer<diy::DiscreteBounds>;
-    using Point   = diy::DynamicPoint<int, DIY_MAX_DIM>;
-
-    Point one = Point::one(D);
-    for(unsigned i = 0; i < D; ++i)
+//    h5::Group* g = new h5::Group(in.getGroup("/level_0"));
+//    std::cerr << "HighFive group opened, file id = " << in.getId() << std::endl;
     {
-        domain.min[i] = 0;
-        domain.max[i] = dimensions[i] - 1;
-    }
+//        h5::DataSet* ds = new h5::DataSet(in.getDataSet(all_var_names[0]));
+//        std::cerr << "HighFive dataset OK, ds.hid = " << ds->getId() << std::endl;
+//        auto dimensions = ds->getDimensions();
+//        std::cerr << "HighFive datasets dimensions OK" << std::endl;
+        // get shape
+        std::vector<h5::DataSet> datasets;
+        for(auto name: all_var_names)
+            datasets.emplace_back(in.getDataSet(name));
+        std::cerr << "HighFive datasets emplace OK, last hid = " << datasets.back().getId() << std::endl;
+        auto dimensions = datasets[0].getDimensions();
+        std::cerr << "HighFive datasets dimensions OK" << std::endl;
 
-    Decomposer::BoolVector wrap { true, true, true };               // TODO
-    Decomposer decomposer(D, domain, nblocks,
-                          Decomposer::BoolVector { false, false, false },   // share_face
-                          wrap,
-                          Decomposer::CoordinateVector { 0, 0, 0 });        // ghosts
+        using Decomposer = diy::RegularDecomposer<diy::DiscreteBounds>;
+        using Point = diy::DynamicPoint<int, DIY_MAX_DIM>;
 
-    decomposer.decompose(world.rank(), assigner, [&master_reader, &wrap, &datasets, &all_var_names, n_mt_vars, one]
-                                                                      (int gid,
-                                                                       const Decomposer::Bounds& core,
-                                                                       const Decomposer::Bounds& bounds,
-                                                                       const Decomposer::Bounds& domain,
-                                                                       const Decomposer::Link& link) {
-        auto* b = new FabBlockR;
+        Point one = Point::one(D);
+        for(unsigned i = 0 ; i < D ; ++i) {
+            domain.min[i] = 0;
+            domain.max[i] = dimensions[i] - 1;
+        }
 
-        // we never want ghosts
-        auto my_bounds = core;
+        Decomposer::BoolVector wrap {true, true, true};               // TODO
+        Decomposer decomposer(D, domain, nblocks,
+                Decomposer::BoolVector {false, false, false},   // share_face
+                wrap,
+                Decomposer::CoordinateVector {0, 0, 0});        // ghosts
 
-        auto shape_4d = my_bounds.max - my_bounds.min + one;
-        typename FabBlockR::Shape shape(&shape_4d[0]);       // quick and hacky
-        bool c_order = true;
-        b->fab_storage_ = decltype(b->fab_storage_)(shape, c_order);
-        b->fab = decltype(b->fab)(b->fab_storage_.data(), shape, c_order);
+        decomposer.decompose(world.rank(), assigner, [&master_reader, &wrap, &datasets, &all_var_names, n_mt_vars, one]
+                (int gid,
+                        const Decomposer::Bounds& core,
+                        const Decomposer::Bounds& bounds,
+                        const Decomposer::Bounds& domain,
+                        const Decomposer::Link& link) {
+          auto* b = new FabBlockR;
+
+          // we never want ghosts
+          auto my_bounds = core;
+
+          auto shape_4d = my_bounds.max - my_bounds.min + one;
+          typename FabBlockR::Shape shape(&shape_4d[0]);       // quick and hacky
+          bool c_order = true;
+          b->fab_storage_ = decltype(b->fab_storage_)(shape, c_order);
+          b->fab = decltype(b->fab)(b->fab_storage_.data(), shape, c_order);
 
 //#ifdef ZARIJA
 //        // pretend that the 1st and only field is particle_mass_density
@@ -83,74 +98,73 @@ void read_from_hdf5_file(std::string infn,
 //        b->extra_fabs_.push_back(b->fab);
 //#endif
 
-        diy::Grid<Real, D> core_grid(shape);
+          diy::Grid<Real, D> core_grid(shape);
 
-        std::vector<size_t> from(D), size(D);
-        for (unsigned i = 0; i < D; ++i)
-        {
-            from[i] = core.min[i];
-            size[i] = core.max[i] - core.min[i] + 1;
-        }
-        for (size_t i = 0; i < all_var_names.size(); ++i)
-        {
-            Real* extra_fab = new Real[b->fab.size()];
-            b->extra_fabs_.emplace_back(extra_fab, shape, c_order);
-            b->extra_names_.push_back(all_var_names[i]);
+          std::vector<size_t> from(D), size(D);
+          for(unsigned i = 0 ; i < D ; ++i) {
+              from[i] = core.min[i];
+              size[i] = core.max[i] - core.min[i] + 1;
+          }
+          for(size_t i = 0 ; i < all_var_names.size() ; ++i) {
+              Real* extra_fab = new Real[b->fab.size()];
+              b->extra_fabs_.emplace_back(extra_fab, shape, c_order);
+              b->extra_names_.push_back(all_var_names[i]);
 
-            datasets[i].select(from, size).read(core_grid.data());
+              auto& ds = datasets[i];
 
-            auto& g = b->extra_fabs_.back();
-            diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
+              std::cerr << "reading from ds into core_grid, ds.refcount = " << H5Iget_ref(ds.getId()) << std::endl;
+              ds.select(from, size).read(core_grid.data());
+              std::cerr << "done reading from ds into core_grid, ds.refcount = " << H5Iget_ref(ds.getId()) << std::endl;
+
+              auto& g = b->extra_fabs_.back();
+              diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
                 g(p) = core_grid(p);
-            });
-        }
+              });
+          }
 
-        // fill the field for MT computation
-        diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
+          // fill the field for MT computation
+          diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
             b->fab(p) = 0;
-        });
-        for (int i = 0; i < n_mt_vars; ++i)
-            diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
+          });
+          for(int i = 0 ; i < n_mt_vars ; ++i)
+              diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
                 b->fab(p) += b->extra_fabs_[i](p);
-            });
+              });
 
-        // copy link
-        diy::AMRLink* amr_link = new diy::AMRLink(D, 0, 1, link.core(), my_bounds);
-        for (int i = 0; i < link.size(); ++i)
-        {
-            amr_link->add_neighbor(link.target(i));
-            // shrink core from bounds, since it's not stored in the RegularLink explicitly
-            auto nbr_core = link.bounds(i);
-            auto nbr_bounds = link.bounds(i);
-            amr_link->add_bounds(0, 1, nbr_core, nbr_bounds);
-        }
+          // copy link
+          diy::AMRLink* amr_link = new diy::AMRLink(D, 0, 1, link.core(), my_bounds);
+          for(int i = 0 ; i < link.size() ; ++i) {
+              amr_link->add_neighbor(link.target(i));
+              // shrink core from bounds, since it's not stored in the RegularLink explicitly
+              auto nbr_core = link.bounds(i);
+              auto nbr_bounds = link.bounds(i);
+              amr_link->add_bounds(0, 1, nbr_core, nbr_bounds);
+          }
 
-        // record wrap
-        for (int dir_x : { -1, 0, 1 })
-        {
-            if (!wrap[0] && dir_x) continue;
-            if (dir_x < 0 && core.min[0] != domain.min[0]) continue;
-            if (dir_x > 0 && core.max[0] != domain.max[0]) continue;
+          // record wrap
+          for(int dir_x: {-1, 0, 1}) {
+              if (!wrap[0] && dir_x) continue;
+              if (dir_x < 0 && core.min[0] != domain.min[0]) continue;
+              if (dir_x > 0 && core.max[0] != domain.max[0]) continue;
 
-            for (int dir_y : { -1, 0, 1 })
-            {
-                if (!wrap[1] && dir_y) continue;
-                if (dir_y < 0 && core.min[1] != domain.min[1]) continue;
-                if (dir_y > 0 && core.max[1] != domain.max[1]) continue;
+              for(int dir_y: {-1, 0, 1}) {
+                  if (!wrap[1] && dir_y) continue;
+                  if (dir_y < 0 && core.min[1] != domain.min[1]) continue;
+                  if (dir_y > 0 && core.max[1] != domain.max[1]) continue;
 
-                for (int dir_z : { -1, 0, 1 })
-                {
-                    if (dir_x == 0 and dir_y == 0 and dir_z == 0)
-                        continue;
+                  for(int dir_z: {-1, 0, 1}) {
+                      if (dir_x == 0 and dir_y == 0 and dir_z == 0)
+                          continue;
 
-                    if (!wrap[2] && dir_z) continue;
-                    if (dir_z < 0 && core.min[2] != domain.min[2]) continue;
-                    if (dir_z > 0 && core.max[2] != domain.max[2]) continue;
-        // TODO! fix wrap
-                    amr_link->add_wrap(diy::Direction{ dir_x, dir_y, dir_z });
-                }
-            }
-        }
-        master_reader.add(gid, b, amr_link);
-    });
+                      if (!wrap[2] && dir_z) continue;
+                      if (dir_z < 0 && core.min[2] != domain.min[2]) continue;
+                      if (dir_z > 0 && core.max[2] != domain.max[2]) continue;
+                      // TODO! fix wrap
+                      amr_link->add_wrap(diy::Direction {dir_x, dir_y, dir_z});
+                  }
+              }
+          }
+          master_reader.add(gid, b, amr_link);
+        });
+    }
 }

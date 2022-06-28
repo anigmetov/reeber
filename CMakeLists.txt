@@ -28,6 +28,7 @@ find_package                (MPI REQUIRED)
 
 find_package                (Threads)
 
+
 # TBB
 if                          (use-tbb)
 find_path                   (TBB_INCLUDE_DIRS tbb/tbb.h)
@@ -65,14 +66,19 @@ find_path                   (DIY_INCLUDE_DIR        diy/master.hpp)
 # HighFive
 add_subdirectory            (ext/HighFive)
 
+# fmt
+add_subdirectory            (ext/fmt)
+
 # Set includes
 include_directories         (${CMAKE_CURRENT_SOURCE_DIR}/include
+                             ${CMAKE_CURRENT_SOURCE_DIR}/ext/fmt/include
                              SYSTEM ${DIY_INCLUDE_DIR}
                              SYSTEM ${MPI_INCLUDE_PATH}
                              SYSTEM ${Boost_INCLUDE_DIR})
 
 # Set libraries
 set                         (libraries
+                             fmt::fmt
                              ${CMAKE_THREAD_LIBS_INIT}
                              ${TBB_LIBRARY}
                              ${TBB_MALLOC_LIBRARY}

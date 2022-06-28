@@ -13,23 +13,33 @@
 
 namespace HighFive {
 
-inline Object::Object() : _hid(H5I_INVALID_HID) {}
+inline Object::Object()
+    : _hid(H5I_INVALID_HID) {}
 
-inline Object::Object(hid_t hid) : _hid(hid) {}
+inline Object::Object(hid_t hid)
+    : _hid(hid)
+{
+    std::cerr << "HighFive Object ctor from hid, _hid = " << _hid << std::endl;
+}
 
-inline Object::Object(const Object& other) : _hid(other._hid) {
+inline Object::Object(const Object& other)
+    : _hid(other._hid) {
+    std::cerr << "HighFive Object cpoy ctor, _hid = " << _hid << std::endl;
     if (other.isValid() && H5Iinc_ref(_hid) < 0) {
         throw ObjectException("Reference counter increase failure");
     }
 }
 
 inline Object::Object(Object&& other) noexcept
-    : _hid(other._hid)  {
+    : _hid(other._hid) {
+    std::cerr << "HighFive Object move ctor, _hid = " << _hid << std::endl;
     other._hid = H5I_INVALID_HID;
 }
 
 inline Object& Object::operator=(const Object& other) {
     if (this != &other) {
+
+        std::cerr << "HighFive Object assignment operator, _hid = " << _hid  << ", other.hid = " << other._hid << std::endl;
         if (_hid != H5I_INVALID_HID)
             H5Idec_ref(_hid);
 
@@ -42,10 +52,16 @@ inline Object& Object::operator=(const Object& other) {
 }
 
 inline Object::~Object() {
-    if (isValid() && H5Idec_ref(_hid) < 0) {
-        std::cerr << "HighFive::~Object: reference counter decrease failure"
-                  << std::endl;
+    if (isValid()) {
+//        std::cerr << "HighFive Object dtor, _hid = " << _hid << std::endl;
+        std::cerr << "HighFive Object dtor, _hid = " << _hid << ", ref count = " << H5Iget_ref(_hid) << std::endl;
+        auto r = H5Idec_ref(_hid);
+        if (r < 0)
+            std::cerr << "HighFive::~Object: reference counter decrease failure, r = " << r << std::endl;
     }
+//    if (isValid() && H5Idec_ref(_hid) < 0) {
+//        std::cerr << "HighFive::~Object: reference counter decrease failure" << std::endl;
+//    }
 }
 
 inline bool Object::isValid() const noexcept {
@@ -58,20 +74,20 @@ inline hid_t Object::getId() const noexcept {
 
 static inline ObjectType _convert_object_type(const H5I_type_t& h5type) {
     switch (h5type) {
-        case H5I_FILE:
-            return ObjectType::File;
-        case H5I_GROUP:
-            return ObjectType::Group;
-        case H5I_DATATYPE:
-            return ObjectType::UserDataType;
-        case H5I_DATASPACE:
-            return ObjectType::DataSpace;
-        case H5I_DATASET:
-            return ObjectType::Dataset;
-        case H5I_ATTR:
-            return ObjectType::Attribute;
-        default:
-            return ObjectType::Other;
+    case H5I_FILE:
+        return ObjectType::File;
+    case H5I_GROUP:
+        return ObjectType::Group;
+    case H5I_DATATYPE:
+        return ObjectType::UserDataType;
+    case H5I_DATASPACE:
+        return ObjectType::DataSpace;
+    case H5I_DATASET:
+        return ObjectType::Dataset;
+    case H5I_ATTR:
+        return ObjectType::Attribute;
+    default:
+        return ObjectType::Other;
     }
 }
 
@@ -110,7 +126,6 @@ inline time_t ObjectInfo::getModificationTime() const noexcept {
 }
 
 
+}  // namespace HighFive
 
-}  // namespace
-
-#endif // H5OBJECT_MISC_HPP
+#endif  // H5OBJECT_MISC_HPP

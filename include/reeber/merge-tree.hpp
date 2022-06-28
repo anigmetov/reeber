@@ -1,4 +1,5 @@
 #include <stack>
+#include <algorithm>
 
 #include <dlog/stats.h>
 #include <dlog/log.h>

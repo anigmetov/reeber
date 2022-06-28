@@ -33,6 +33,9 @@
 #include "../../amr-merge-tree/include/read-npy.h"
 #include "../../amr-merge-tree/include/read-hdf5.h"
 
+//#include <lowfive/vol-metadata.hpp>
+//#include <lowfive/vol-dist-metadata.hpp>
+
 #include "amr-plot-reader.h"
 #include "amr-connected-components-complex.h"
 
@@ -137,10 +140,10 @@ void read_from_file(std::string infn,
         int nblocks,
         BoolVector wrap)
 {
-    if (not file_exists(infn))
-    {
-        throw std::runtime_error("Cannot read file " + infn);
-    }
+//    if (not file_exists(infn))
+//    {
+//        throw std::runtime_error("Cannot read file " + infn);
+//    }
 
     if (ends_with(infn, ".npy"))
     {
@@ -204,11 +207,16 @@ void write_tree_blocks(const diy::mpi::communicator& world, bool split, const st
     }
 }
 
+
 int main(int argc, char** argv)
 {
-    // setup low five
     diy::mpi::environment env(argc, argv);
     diy::mpi::communicator world;
+
+
+//     setup low five
+//    LowFive::MetadataVOL vol;
+//    vol.set_memory("*", "*");
 
     int nblocks = world.size();
     std::string prefix = "./DIY.XXXXXX";
