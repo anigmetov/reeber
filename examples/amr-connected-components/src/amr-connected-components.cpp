@@ -390,8 +390,8 @@ int main(int argc, char** argv)
     auto time_to_read_data = timer.elapsed();
     dlog::flush();
 
-    LOG_SEV_IF(world.rank() == 0, info) << "Data read, local size = " << master_reader.size();
-    LOG_SEV_IF(world.rank() == 0, info) << "Time to read data:       " << dlog::clock_to_string(timer.elapsed());
+    LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Data read, local size = " << master_reader.size();
+    LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to read data:       " << dlog::clock_to_string(timer.elapsed());
     dlog::flush();
 
     timer.restart();
@@ -420,11 +420,11 @@ int main(int argc, char** argv)
         if (absolute)
         {
             absolute_rho = rho;
-            LOG_SEV_IF(world.rank() == 0, info) << "Time to compute local trees and components:  "
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to compute local trees and components:  "
                                                 << dlog::clock_to_string(timer.elapsed());
         } else
         {
-            LOG_SEV_IF(world.rank() == 0, info) << "Time to construct FabComponentBlocks: "
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to construct FabComponentBlocks: "
                                                 << dlog::clock_to_string(timer.elapsed());
             dlog::flush();
             timer.restart();
@@ -449,10 +449,10 @@ int main(int argc, char** argv)
             time_to_get_average = timer.elapsed();
 #endif
 
-            LOG_SEV_IF(world.rank() == 0, info) << "Total sum = " << total_sum << ", total_unmasked = "
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Total sum = " << total_sum << ", total_unmasked = "
                                                 << total_unmasked;
 
-            LOG_SEV_IF(world.rank() == 0, info) << "Average = " << mean << ", rho = " << rho
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Average = " << mean << ", rho = " << rho
                                                 << ", absolute_rho = " << absolute_rho
                                                 << ", time to compute average: "
                                                 << dlog::clock_to_string(timer.elapsed());
@@ -484,7 +484,7 @@ int main(int argc, char** argv)
             time_to_init_blocks = timer.elapsed();
 #endif
 
-            LOG_SEV_IF(world.rank() == 0, info) << "Time to initialize FabComponentBlocks (low vertices, local trees, components, outgoing edges): " << timer.elapsed();
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to initialize FabComponentBlocks (low vertices, local trees, components, outgoing edges): " << timer.elapsed();
             time_for_local_computation += timer.elapsed();
         }
 
@@ -504,7 +504,7 @@ int main(int argc, char** argv)
 
             Real total_sum_low = proxy.get<Real>();
             Real total_sum_active = proxy.get<Real>();
-            LOG_SEV_IF(world.rank() == 0, info) << "Sum of active values  = " << total_sum_active
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Sum of active values  = " << total_sum_active
                                                 << ", sum of low = " << total_sum_low
                                                 << ", total sum = " << total_sum_active + total_sum_low;
 
@@ -527,7 +527,7 @@ int main(int argc, char** argv)
         time_to_delete_low_edges = timer.elapsed();
 #endif
 
-        LOG_SEV_IF(world.rank() == 0, info) << "edges symmetrized, time elapsed " << timer.elapsed();
+        LOG_SEV_IF(world.rank() == 0, info) << "Reeber: edges symmetrized, time elapsed " << timer.elapsed();
         auto time_for_communication = timer.elapsed();
         dlog::flush();
         timer.restart();
@@ -568,7 +568,7 @@ int main(int argc, char** argv)
             cc_receive_time += timer_receieve.elapsed();
 #endif
 
-            LOG_SEV_IF(world.rank() == 0, info) << "MASTER round " << rounds << ", get OK";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: MASTER round " << rounds << ", get OK";
             dlog::flush();
 
 #ifdef REEBER_DO_DETAILED_TIMING
@@ -584,7 +584,7 @@ int main(int argc, char** argv)
             //LOG_SEV_IF(world.rank() == 0, info) << "MASTER round " << rounds << ", collectives exchange OK";
             // to compute total number of undone blocks
 
-            LOG_SEV_IF(world.rank() == 0, info) << "MASTER round " << rounds << ", global_n_undone = "
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: MASTER round " << rounds << ", global_n_undone = "
                                                 << global_n_undone;
 
             if (print_stats)
@@ -608,16 +608,15 @@ int main(int argc, char** argv)
 
         //    fmt::print("world.rank = {}, time for exchange = {}\n", world.rank(), dlog::clock_to_string(timer.elapsed()));
 
-        LOG_SEV_IF(world.rank() == 0, info) << "Time for exchange:  " << dlog::clock_to_string(timer.elapsed());
-        LOG_SEV_IF(world.rank() == 0, info) << "Total time for computation:  " << time_total_computation;
+        LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time for exchange:  " << dlog::clock_to_string(timer.elapsed());
+        LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Total time for computation:  " << time_total_computation;
         time_for_communication += timer.elapsed();
         dlog::flush();
         timer.restart();
 
-        // save the result
         write_tree_blocks(world, split, output_filename, master);
 
-        LOG_SEV_IF(world.rank() == 0, info) << "Time to write tree:  " << dlog::clock_to_string(timer.elapsed());
+        LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to write tree:  " << dlog::clock_to_string(timer.elapsed());
         auto time_for_output = timer.elapsed();
         dlog::flush();
         timer.restart();
@@ -638,7 +637,7 @@ int main(int argc, char** argv)
                     });
         }
 
-        LOG_SEV_IF(world.rank() == 0, info) << "Time to write diagrams:  " << dlog::clock_to_string(timer.elapsed());
+        LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to write diagrams:  " << dlog::clock_to_string(timer.elapsed());
         time_for_output += timer.elapsed();
         dlog::flush();
         timer.restart();
@@ -653,7 +652,7 @@ int main(int argc, char** argv)
                 b->multiply_integral_by_cell_volume();
             });
 
-            LOG_SEV_IF(world.rank() == 0, info) << "Local integrals computed\n";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Local integrals computed\n";
             dlog::flush();
             world.barrier();
 
@@ -689,7 +688,7 @@ int main(int argc, char** argv)
                         integral_vars.insert(integral_vars.begin(), std::string("n_vertices"));
                         integral_vars.insert(integral_vars.begin(), std::string("n_cells"));
 
-                        LOG_SEV_IF(world.rank() == 0, debug) << "integral_vars:  " << container_to_string(integral_vars);
+                        LOG_SEV_IF(world.rank() == 0, debug) << "Reeber: integral_vars:  " << container_to_string(integral_vars);
 
                         bool print_header = false;
                         if (print_header)
@@ -736,7 +735,7 @@ int main(int argc, char** argv)
                         }
                     });
 
-            LOG_SEV_IF(world.rank() == 0, info) << "Time to compute and write integral:  "
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Time to compute and write integral:  "
                                                 << dlog::clock_to_string(timer.elapsed());
             time_for_output += timer.elapsed();
             dlog::flush();
@@ -793,7 +792,7 @@ int main(int argc, char** argv)
 
         world.barrier();
 
-        std::string final_timings = fmt::format("run: {} read: {} local: {} exchange: {} output: {} total: {}\n",
+        std::string final_timings = fmt::format("Reeber: run: {} read: {} local: {} exchange: {} output: {} total: {}\n",
                 n_run, time_to_read_data, time_for_local_computation, time_for_communication, time_for_output,
                 time_total_computation);
         LOG_SEV_IF(world.rank() == 0, info) << final_timings;
@@ -801,7 +800,7 @@ int main(int argc, char** argv)
         dlog::flush();
 #ifdef REEBER_DO_DETAILED_TIMING
         std::string final_detailed_timings = fmt::format(
-                "run: {} construct_blocks = {} init_blocks = {} average = {} delete_low_edges = {} cc_send = {} cc_receive = {} cc_exchange_1 = {} cc_exchange_2 = {}\n",
+                "Reeber run: {} construct_blocks = {} init_blocks = {} average = {} delete_low_edges = {} cc_send = {} cc_receive = {} cc_exchange_1 = {} cc_exchange_2 = {}\n",
                 n_run, time_to_construct_blocks, time_to_init_blocks, time_to_get_average, time_to_delete_low_edges,
                 cc_send_time, cc_receive_time, cc_exchange_1_time, cc_exchange_2_time);
         LOG_SEV_IF(world.rank() == 0, info) << final_detailed_timings;
@@ -821,18 +820,18 @@ int main(int argc, char** argv)
                 max_n_gids = std::max(max_n_gids, static_cast<decltype(max_n_gids)>(block_gids.size()));
             });
 
-            LOG_SEV_IF(max_n_gids > 0, info) << "STAT max_n_gids[" << world.rank() << "] = " << max_n_gids;
-            LOG_SEV_IF(max_n_gids > 0, info) << "STAT total_n_gids[" << world.rank() << "] = " << gids.size();
+            LOG_SEV_IF(max_n_gids > 0, info) << "Reeber STAT max_n_gids[" << world.rank() << "] = " << max_n_gids;
+            LOG_SEV_IF(max_n_gids > 0, info) << "Reeber STAT total_n_gids[" << world.rank() << "] = " << gids.size();
             dlog::flush();
             world.barrier();
 
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT sizes = np.array(sizes)";
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT max_n_gids = np.array(max_n_gids)";
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT total_n_gids = np.array(total_n_gids)";
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT hist_array = sizes";
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT plt.hist(hist_array, bins = 'auto')";
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT plt.title('{} cores'.format(n_cores))";
-            LOG_SEV_IF(world.rank() == 0, info) << "STAT plt.show()";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT sizes = np.array(sizes)";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT max_n_gids = np.array(max_n_gids)";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT total_n_gids = np.array(total_n_gids)";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT hist_array = sizes";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT plt.hist(hist_array, bins = 'auto')";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT plt.title('{} cores'.format(n_cores))";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber STAT plt.show()";
         }
 
         size_t local_n_active = 0;
@@ -868,7 +867,7 @@ int main(int argc, char** argv)
                 local_n_blocks += 1;
             });
 
-            LOG_SEV_IF(world.rank() == 0, info) << "Total_n_low = " << total_n_low << ", total_n_active = "
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber Total_n_low = " << total_n_low << ", total_n_active = "
                                                 << total_n_active << ", total_n_masked = "
                                                 << total_n_masked;
             dlog::flush();
@@ -950,52 +949,52 @@ int main(int argc, char** argv)
 
 
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_time_to_construct_blocks = " << max_time_to_construct_blocks;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_time_to_construct_blocks = " << min_time_to_construct_blocks;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_time_to_construct_blocks = " << max_time_to_construct_blocks;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_time_to_construct_blocks = " << min_time_to_construct_blocks;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_time_to_init_blocks = " << max_time_to_init_blocks;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_time_to_init_blocks = " << min_time_to_init_blocks;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_time_to_init_blocks = " << max_time_to_init_blocks;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_time_to_init_blocks = " << min_time_to_init_blocks;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_time_to_compute_components = " << max_time_to_compute_components;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_time_to_compute_components = " << min_time_to_compute_components;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_time_to_compute_components = " << max_time_to_compute_components;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_time_to_compute_components = " << min_time_to_compute_components;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_time_to_copy_nodes = " << max_time_to_copy_nodes;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_time_to_copy_nodes = " << min_time_to_copy_nodes;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_time_to_copy_nodes = " << max_time_to_copy_nodes;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_time_to_copy_nodes = " << min_time_to_copy_nodes;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_time_to_get_average = " << max_time_to_get_average;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_time_to_get_average = " << min_time_to_get_average;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
-
-
-            LOG_SEV_IF(world.rank() == 0, info) << "max_cc_send_time = " << max_cc_send_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_cc_send_time = " << min_cc_send_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
-
-            LOG_SEV_IF(world.rank() == 0, info) << "max_cc_exchange_1_time = " << max_cc_exchange_1_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_cc_exchange_1_time = " << min_cc_exchange_1_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_time_to_get_average = " << max_time_to_get_average;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_time_to_get_average = " << min_time_to_get_average;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_cc_receive_time = " << max_cc_receive_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_cc_receive_time = " << min_cc_receive_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_cc_send_time = " << max_cc_send_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_cc_send_time = " << min_cc_send_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_cc_exchange_2_time = " << max_cc_exchange_2_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "min_cc_exchange_2_time = " << min_cc_exchange_2_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "---------------------------------------";
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_cc_exchange_1_time = " << max_cc_exchange_1_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_cc_exchange_1_time = " << min_cc_exchange_1_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_block_receive_time = " << max_block_receive_time;
 
-            LOG_SEV_IF(world.rank() == 0, info) << "max_original_sparsify_time = " << max_original_sparsify_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "max_set_low_time = " << max_set_low_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "max_original_components_time = " << max_original_components_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "max_local_tree_time = " << max_local_tree_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "max_out_edges_time = " << max_out_edges_time;
-            LOG_SEV_IF(world.rank() == 0, info) << "max_integral_init_time = " << max_integral_init_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_cc_receive_time = " << max_cc_receive_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_cc_receive_time = " << min_cc_receive_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
+
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_cc_exchange_2_time = " << max_cc_exchange_2_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber min_cc_exchange_2_time = " << min_cc_exchange_2_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber ---------------------------------------";
+
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_block_receive_time = " << max_block_receive_time;
+
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_original_sparsify_time = " << max_original_sparsify_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_set_low_time = " << max_set_low_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_original_components_time = " << max_original_components_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_local_tree_time = " << max_local_tree_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_out_edges_time = " << max_out_edges_time;
+            LOG_SEV_IF(world.rank() == 0, info) << "Reeber max_integral_init_time = " << max_integral_init_time;
 
 
             if (cc_exchange_2_time == max_cc_exchange_2_time or
@@ -1003,7 +1002,7 @@ int main(int argc, char** argv)
                 cc_receive_time == max_cc_receive_time or
                 cc_receive_time == min_cc_receive_time)
             {
-                LOG_SEV(info) << "Rank = " << world.rank() << ", cc_exchange_2_time = " << cc_exchange_2_time << ", receive_time = "
+                LOG_SEV(info) << "Reeber Rank = " << world.rank() << ", cc_exchange_2_time = " << cc_exchange_2_time << ", receive_time = "
                               << cc_receive_time << ", local_blocks = " << local_n_blocks
                               << ", local_n_active = " << local_n_active
                               << ", local_n_components = " << local_n_components;
@@ -1019,44 +1018,44 @@ int main(int argc, char** argv)
                         return;
 
                     if (b->global_receive_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid
                                                                             << ", Total time in receive = "
                                                                             << b->global_receive_time;
                      if (b->process_senders_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid
                                                                             << ", time_to_receive_trees_and_gids = "
                                                                             << b->process_senders_time;
                     if (b->repair_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", repair_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", repair_time = "
                                                                             << b->repair_time;
 
                     if (b->merge_call_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", merge_call_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", merge_call_time = "
                                                                             << b->merge_call_time;
-                    LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", merge_calls = "
+                    LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", merge_calls = "
                                                                         << b->merge_calls << ", edges in merge " << b->edges_in_merge;
                     if (b->uc_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", uc_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", uc_time = "
                                                                             << b->uc_time;
                     if (b->comps_loop_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", comps_loop = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", comps_loop = "
                                       << b->comps_loop_time;
 
                     if (b->rrtc_loop_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", rrtc_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", rrtc_time = "
                                                                             << b->rrtc_loop_time;
                     if (b->ucn_loop_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", ucn_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", ucn_time = "
                                                                             << b->ucn_loop_time;
 
                     if (b->expand_link_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", expand_link_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", expand_link_time = "
                                                                             << b->expand_link_time;
                     if (b->is_done_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", is_done_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", is_done_time = "
                                                                             << b->is_done_time;
                     if (b->collectives_time > 0)
-                        LOG_SEV(info) << "MAX RECEIVE TIME details, gid = " << b->gid << ", collectives_time = "
+                        LOG_SEV(info) << "Reeber MAX RECEIVE TIME details, gid = " << b->gid << ", collectives_time = "
                                                                             << b->collectives_time;
                  });
             }
