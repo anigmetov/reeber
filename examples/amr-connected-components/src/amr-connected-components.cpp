@@ -316,7 +316,7 @@ int main(int argc, char** argv)
         n_mt_vars = all_var_names.size();
     }
 
-    LOG_SEV_IF(world.rank() == 0, info) << "Reading fields: " << container_to_string(all_var_names) << ", fields to sum = " << n_mt_vars;
+    LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Reading fields: " << container_to_string(all_var_names) << ", fields to sum = " << n_mt_vars;
     dlog::flush();
 
     bool write_diag = (ops >> PosOption(output_diagrams_filename)) and (output_diagrams_filename != "none");
@@ -331,7 +331,7 @@ int main(int argc, char** argv)
 
     dlog::Timer timer;
     dlog::Timer timer_all;
-    LOG_SEV_IF(world.rank() == 0, info) << "Starting computation, input_filename = " << input_filename << ", nblocks = "
+    LOG_SEV_IF(world.rank() == 0, info) << "Reeber: Starting computation, input_filename = " << input_filename << ", nblocks = "
                                         << nblocks
                                         << ", rho = " << rho;
     dlog::flush();

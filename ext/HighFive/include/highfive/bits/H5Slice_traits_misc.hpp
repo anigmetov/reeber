@@ -197,7 +197,7 @@ inline void SliceTraits<Derivate>::read(T* array, const DataType& dtype) const {
     const DataType& mem_datatype = dtype.empty() ? create_and_check_datatype<element_type>()
                                                  : dtype;
 
-    std::cerr << "HighFive: mem_datatype size = " << mem_datatype.getSize() << std::endl;
+    //std::cerr << "HighFive: mem_datatype size = " << mem_datatype.getSize() << std::endl;
 
     if (H5Dread(details::get_dataset(slice).getId(),
                 mem_datatype.getId(),

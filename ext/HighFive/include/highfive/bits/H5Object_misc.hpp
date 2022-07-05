@@ -19,12 +19,12 @@ inline Object::Object()
 inline Object::Object(hid_t hid)
     : _hid(hid)
 {
-    std::cerr << "HighFive Object ctor from hid, _hid = " << _hid << std::endl;
+    //std::cerr << "HighFive Object ctor from hid, _hid = " << _hid << std::endl;
 }
 
 inline Object::Object(const Object& other)
     : _hid(other._hid) {
-    std::cerr << "HighFive Object cpoy ctor, _hid = " << _hid << std::endl;
+    //std::cerr << "HighFive Object cpoy ctor, _hid = " << _hid << std::endl;
     if (other.isValid() && H5Iinc_ref(_hid) < 0) {
         throw ObjectException("Reference counter increase failure");
     }
@@ -32,14 +32,14 @@ inline Object::Object(const Object& other)
 
 inline Object::Object(Object&& other) noexcept
     : _hid(other._hid) {
-    std::cerr << "HighFive Object move ctor, _hid = " << _hid << std::endl;
+    //std::cerr << "HighFive Object move ctor, _hid = " << _hid << std::endl;
     other._hid = H5I_INVALID_HID;
 }
 
 inline Object& Object::operator=(const Object& other) {
     if (this != &other) {
 
-        std::cerr << "HighFive Object assignment operator, _hid = " << _hid  << ", other.hid = " << other._hid << std::endl;
+        //std::cerr << "HighFive Object assignment operator, _hid = " << _hid  << ", other.hid = " << other._hid << std::endl;
         if (_hid != H5I_INVALID_HID)
             H5Idec_ref(_hid);
 
@@ -54,10 +54,10 @@ inline Object& Object::operator=(const Object& other) {
 inline Object::~Object() {
     if (isValid()) {
 //        std::cerr << "HighFive Object dtor, _hid = " << _hid << std::endl;
-        std::cerr << "HighFive Object dtor, _hid = " << _hid << ", ref count = " << H5Iget_ref(_hid) << std::endl;
+        //std::cerr << "HighFive Object dtor, _hid = " << _hid << ", ref count = " << H5Iget_ref(_hid) << std::endl;
         auto r = H5Idec_ref(_hid);
-        if (r < 0)
-            std::cerr << "HighFive::~Object: reference counter decrease failure, r = " << r << std::endl;
+        //if (r < 0)
+            //std::cerr << "HighFive::~Object: reference counter decrease failure, r = " << r << std::endl;
     }
 //    if (isValid() && H5Idec_ref(_hid) < 0) {
 //        std::cerr << "HighFive::~Object: reference counter decrease failure" << std::endl;

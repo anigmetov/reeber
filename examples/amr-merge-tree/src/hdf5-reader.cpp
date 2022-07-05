@@ -42,7 +42,7 @@ void read_from_hdf5_file(std::string infn,
     H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
 
     h5::File in(infn);
-    std::cerr << "HighFive file opened, file id = " << in.getId() << std::endl;
+    //std::cerr << "HighFive file opened, file id = " << in.getId() << std::endl;
 
 //    h5::Group* g = new h5::Group(in.getGroup("/level_0"));
 //    std::cerr << "HighFive group opened, file id = " << in.getId() << std::endl;
@@ -55,9 +55,9 @@ void read_from_hdf5_file(std::string infn,
         std::vector<h5::DataSet> datasets;
         for(auto name: all_var_names)
             datasets.emplace_back(in.getDataSet(name));
-        std::cerr << "HighFive datasets emplace OK, last hid = " << datasets.back().getId() << std::endl;
+        //std::cerr << "HighFive datasets emplace OK, last hid = " << datasets.back().getId() << std::endl;
         auto dimensions = datasets[0].getDimensions();
-        std::cerr << "HighFive datasets dimensions OK" << std::endl;
+        //std::cerr << "HighFive datasets dimensions OK" << std::endl;
 
         using Decomposer = diy::RegularDecomposer<diy::DiscreteBounds>;
         using Point = diy::DynamicPoint<int, DIY_MAX_DIM>;
@@ -112,9 +112,9 @@ void read_from_hdf5_file(std::string infn,
 
               auto& ds = datasets[i];
 
-              std::cerr << "reading from ds into core_grid, ds.refcount = " << H5Iget_ref(ds.getId()) << std::endl;
+              //std::cerr << "reading from ds into core_grid, ds.refcount = " << H5Iget_ref(ds.getId()) << std::endl;
               ds.select(from, size).read(core_grid.data());
-              std::cerr << "done reading from ds into core_grid, ds.refcount = " << H5Iget_ref(ds.getId()) << std::endl;
+              //std::cerr << "done reading from ds into core_grid, ds.refcount = " << H5Iget_ref(ds.getId()) << std::endl;
 
               auto& g = b->extra_fabs_.back();
               diy::for_each(shape, [&](const typename FabBlockR::Shape& p) {
