@@ -225,10 +225,6 @@ int main(int argc, char** argv)
     std::string profile_path;
     std::string log_level = "info";
 
-    dlog::add_stream(std::cerr, dlog::severity(log_level))
-            << dlog::stamp() << dlog::aux_reporter(world.rank()) << dlog::color_pre() << dlog::level()
-            << dlog::color_post() >> dlog::flush();
-
     // threshold
     Real rho = 81.66;
     Real absolute_rho;
@@ -241,7 +237,6 @@ int main(int argc, char** argv)
 
     using namespace opts;
 
-    LOG_SEV_IF(world.rank() == 0, info) << "Started, n_runs = " << n_runs << ", size of Real = " << sizeof(Real);
 
     opts::Options ops(argc, argv);
     ops
@@ -256,6 +251,12 @@ int main(int argc, char** argv)
             >> Option('r', "runs", n_runs, "number of runs")
             >> Option('p', "profile", profile_path, "path to keep the execution profile")
             >> Option('l', "log", log_level, "log level");
+
+    dlog::add_stream(std::cerr, dlog::severity(log_level))
+            << dlog::stamp() << dlog::aux_reporter(world.rank()) << dlog::color_pre() << dlog::level()
+            << dlog::color_post() >> dlog::flush();
+
+    LOG_SEV_IF(world.rank() == 0, info) << "Started, n_runs = " << n_runs << ", size of Real = " << sizeof(Real);
 
     bool absolute =
             ops >> Present('a', "absolute", "use absolute values for thresholds (instead of multiples of mean)");
@@ -792,10 +793,10 @@ int main(int argc, char** argv)
 
         world.barrier();
 
-        std::string final_timings = fmt::format("Reeber: run: {} read: {} local: {} exchange: {} output: {} total: {}\n",
-                n_run, time_to_read_data, time_for_local_computation, time_for_communication, time_for_output,
+        std::string final_timings = fmt::format("Reeber: input: {} run: {} read: {} local: {} exchange: {} output: {} total: {} milliseconds\n",
+                input_filename, n_run, time_to_read_data, time_for_local_computation, time_for_communication, time_for_output,
                 time_total_computation);
-        LOG_SEV_IF(world.rank() == 0, info) << final_timings;
+        LOG_SEV_IF(world.rank() == 0, warning) << final_timings;
 
         dlog::flush();
 #ifdef REEBER_DO_DETAILED_TIMING
