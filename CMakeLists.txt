@@ -1,4 +1,4 @@
-project                     (Reeber Fortran CXX C)
+project                     (Reeber CXX C)
 cmake_minimum_required      (VERSION 3.1)
 
 option                      (amrex              "Build Reeber with AMReX support"               OFF)

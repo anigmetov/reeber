@@ -5,7 +5,7 @@ find_package(AMReX REQUIRED HINTS ${AMREX_INSTALL_DIR})
 
 set (libraries ${libraries}
         ${CMAKE_THREAD_LIBS_INIT}
-        AMReX::amrex
+        amrex
         )
 
 # includes

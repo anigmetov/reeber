@@ -4,6 +4,7 @@ foreach(real   double)
     # include files
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/../amr-merge-tree/include
+            ${AMREX_INSTALL_DIR}/include
 #            /home/narn/code/LowFive/include
             ${DIY_INCLUDE_DIR})
 
@@ -12,7 +13,7 @@ foreach(real   double)
 
     set (mylibraries ${libraries}
             ${CMAKE_THREAD_LIBS_INIT}
-            AMReX::amrex
+            ${AMREX_INSTALL_DIR}/lib/libamrex.so
             HighFive
 #            /home/narn/code/LowFive/build_debug/src/liblowfive.so
 #            /home/narn/code/LowFive/build_debug/src/liblowfive-dist.a
