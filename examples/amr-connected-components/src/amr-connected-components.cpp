@@ -793,8 +793,8 @@ int main(int argc, char** argv)
 
         world.barrier();
 
-        std::string final_timings = fmt::format("Reeber: input: {} run: {} read: {} local: {} exchange: {} output: {} total: {} milliseconds\n",
-                input_filename, n_run, time_to_read_data, time_for_local_computation, time_for_communication, time_for_output,
+        std::string final_timings = fmt::format("Reeber: input: {} n_ranks: {} run: {} read: {} local: {} exchange: {} output: {} total: {} milliseconds\n",
+                input_filename, world.size(), n_run, time_to_read_data, time_for_local_computation, time_for_communication, time_for_output,
                 time_total_computation);
         LOG_SEV_IF(world.rank() == 0, warning) << final_timings;
 
